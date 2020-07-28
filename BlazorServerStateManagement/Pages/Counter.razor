@@ -1,0 +1,34 @@
+﻿@page "/counter"
+@inject CounterStateService _counterState
+
+<h1>Counter with state!</h1>
+<h5>Using local storage state. Non protected, hacky DIY version.</h5>
+
+@if (hasLoaded)
+{
+	<p>Current count: @_counterState.Count</p>
+}
+
+<button class="btn btn-primary" @onclick="@_counterState.Increment">Count + 1</button>
+<button class="btn btn-primary" @onclick="@_counterState.Decrement">Count - 1</button>
+<button class="btn btn-primary" @onclick="@RemoveState">Remove State</button>
+
+
+@code {
+	bool hasLoaded = false;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await _counterState.GetCountState();
+			hasLoaded = true;
+			StateHasChanged();
+		}
+	}
+
+	async Task RemoveState()
+	{
+		await _counterState.ClearState();
+		StateHasChanged();
+	}
+}

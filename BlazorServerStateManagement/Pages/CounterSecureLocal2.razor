@@ -1,0 +1,44 @@
+﻿@page "/countersecurelocal"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedSessionStore
+
+<h1>Counter Secure Local State!</h1>
+<h5>Using protected local storage for state. State is maintained even after the window is closed.</h5>
+<p>Current count: @currentCountLocal</p>
+
+
+<button class="btn btn-primary" @onclick="@IncrementCount">Count + 1</button>
+<button class="btn btn-primary" @onclick="@DecrementCount">Count - 1</button>
+<button class="btn btn-primary" @onclick="@RemoveState">Remove State</button>
+
+@code {
+
+	int currentCountLocal;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			currentCountLocal = await ProtectedSessionStore.GetAsync<int>(nameof(currentCountLocal));
+			StateHasChanged();
+		}
+	}
+
+	private async Task IncrementCount()
+	{
+		currentCountLocal++;
+		await ProtectedSessionStore.SetAsync(nameof(currentCountLocal), currentCountLocal);
+	}
+
+	private async Task DecrementCount()
+	{
+		currentCountLocal -= 1;
+		await ProtectedSessionStore.SetAsync(nameof(currentCountLocal), currentCountLocal);
+	}
+
+	private async Task RemoveState()
+	{
+		currentCountLocal = 0;
+		await ProtectedSessionStore.DeleteAsync(nameof(currentCountLocal));
+	}
+}

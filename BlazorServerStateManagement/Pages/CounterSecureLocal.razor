@@ -1,0 +1,44 @@
+﻿@page "/countersecuresession"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+<h1>Counter Secure Session State!</h1>
+<h5>Using protected session storage for state. State is removed after the window is closed.</h5>
+<p>Current count: @currentCountSession</p>
+
+
+<button class="btn btn-primary" @onclick="@IncrementCount">Count + 1</button>
+<button class="btn btn-primary" @onclick="@DecrementCount">Count - 1</button>
+<button class="btn btn-primary" @onclick="@RemoveState">Remove State</button>
+
+@code {
+
+	int currentCountSession;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			currentCountSession = await ProtectedSessionStore.GetAsync<int>(nameof(currentCountSession));
+			StateHasChanged();
+		}
+	}
+
+	private async Task IncrementCount()
+	{
+		currentCountSession++;
+		await ProtectedSessionStore.SetAsync(nameof(currentCountSession), currentCountSession);
+	}
+
+	private async Task DecrementCount()
+	{
+		currentCountSession -= 1;
+		await ProtectedSessionStore.SetAsync(nameof(currentCountSession), currentCountSession);
+	}
+
+	private async Task RemoveState()
+	{
+		currentCountSession = 0;
+		await ProtectedSessionStore.DeleteAsync(nameof(currentCountSession));
+	}
+}
